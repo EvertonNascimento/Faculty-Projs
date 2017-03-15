@@ -33,7 +33,7 @@ public class RendezVousServer {
         System.err.println("REST RendezVous Server ready @ " + baseUri);
 
 
-        //CLIENTE
+        //CLIENT
         ClientConfig clientConfig = new ClientConfig();
         Client client = ClientBuilder.newClient(clientConfig);
 
