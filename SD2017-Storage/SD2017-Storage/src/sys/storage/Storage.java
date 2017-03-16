@@ -6,7 +6,8 @@ import api.Document;
 
 public interface Storage {
 
-	// Retrieves the list of urls of the documents that have all the keywords being searched
+	// Retrieves the list of urls of the documents that have all the keywords being searched´
+	
 	List<Document> search( List<String> keywords );
 	
 	//Adds the given document to the stored index
