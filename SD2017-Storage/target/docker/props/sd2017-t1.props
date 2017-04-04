@@ -1,0 +1,6 @@
+rendezvous-mainclass=rest.server.RendezVousServer
+rendezvous-port=8080
+rendezvous-multicast-address=229.229.229.229:9999
+rendezvous-timeout=30
+indexer-rest-mainclass=rest.server.IndexerServer
+indexer-soap-mainclass=sys.indexer.soap.IndexerServer
