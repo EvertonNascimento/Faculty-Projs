@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SD2017-T1-0.0.1-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/SD2017-Storage/target/SD2017-T1-0.0.1-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
