@@ -21,6 +21,8 @@ import org.glassfish.jersey.server.internal.process.Endpoint;
 
 public class IndexingServer {
 
+
+
 	public static void main(String[] args) throws Exception {
 
 		Multicast m = new Multicast();
@@ -40,19 +42,17 @@ public class IndexingServer {
 		System.err.println("REST Indexing Server ready @ " + baseUri + " : local IP = "
 				+ InetAddress.getLocalHost().getHostAddress());
 		
-		WebTarget target = m.GetMulticast();
 
+
+		WebTarget target = m.GetMulticast();
 		//é mesmo isto???
 		String b = "http://" + InetAddress.getLocalHost().getHostAddress();
-
-
 		api.Endpoint endpoint = new api.Endpoint(b ,Collections.emptyMap());
-
 		Response response = target.path("/contacts/" + endpoint.generateId()).request()
 				.post(Entity.entity(endpoint, MediaType.APPLICATION_JSON));
-
 		System.err.println(response.getStatus());
-		
+
+
 	}
 
 }

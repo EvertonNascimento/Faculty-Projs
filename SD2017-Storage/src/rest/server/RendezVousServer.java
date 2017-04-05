@@ -28,8 +28,8 @@ public class RendezVousServer {
 				+ InetAddress.getLocalHost().getHostAddress());
 
 		// multicast
-		String multAddress = "229.229.229.229";//igual no servidor de indexação 
-		int multPort = 9999;//igual no servidor de indexação 
+		String multAddress = "229.229.229.229";//igual no servidor de indexaï¿½ï¿½o 
+		int multPort = 9999;//igual no servidor de indexaï¿½ï¿½o 
 		
 		final InetAddress address = InetAddress.getByName(multAddress);
 		MulticastSocket socket = new MulticastSocket(multPort);
@@ -41,7 +41,7 @@ public class RendezVousServer {
 			socket.receive(request);
 			
 			DatagramPacket reply= new DatagramPacket(buffer,buffer.length);
-			String cena= "http://"+ InetAddress.getLocalHost().getHostAddress();
+			String cena= "http://"+ InetAddress.getLocalHost().getHostAddress()+":"+ port;
 			reply.setSocketAddress(new InetSocketAddress(request.getAddress(), request.getPort()));
 			reply.setData(cena.getBytes());
 			socket.send(reply);
