@@ -1,9 +1,15 @@
 <component name="libraryTable">
   <library name=".mylyn1">
     <CLASSES>
+<<<<<<< HEAD
       <root url="jar://$PROJECT_DIR$/SD2017-Storage/.metadata/.mylyn/tasks.xml.zip!/" />
       <root url="jar://$PROJECT_DIR$/SD2017-Storage/.metadata/.mylyn/repositories.xml.zip!/" />
       <root url="jar://$PROJECT_DIR$/SD2017-Storage/.metadata/.mylyn/.tasks.xml.zip!/" />
+=======
+      <root url="jar://$PROJECT_DIR$/.metadata/.mylyn/.tasks.xml.zip!/" />
+      <root url="jar://$PROJECT_DIR$/.metadata/.mylyn/repositories.xml.zip!/" />
+      <root url="jar://$PROJECT_DIR$/.metadata/.mylyn/tasks.xml.zip!/" />
+>>>>>>> 55363ce4d8644ac51ccc088db06e63c0988987c0
     </CLASSES>
     <JAVADOC />
     <SOURCES />

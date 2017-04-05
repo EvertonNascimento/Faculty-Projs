@@ -31,10 +31,16 @@ public class RendezVousResources implements RendezVousService {
 	public void register(@PathParam("id") String id, Endpoint endpoint) {
 		System.err.printf("register: %s <%s>\n", id, endpoint);
 
+		
 		if (db.containsKey(id))
 			throw new WebApplicationException(CONFLICT);
 		else
 			db.put(id, endpoint);
+	
+	
+	
+	
+	
 	}
 
 	@PUT

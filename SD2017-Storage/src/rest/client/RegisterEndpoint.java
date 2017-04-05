@@ -47,5 +47,7 @@ public class RegisterEndpoint {
 
 		System.err.println(response.getStatus());
 
+		System.out.print("caralho " +response.getStatus() );
+
 	}
 }

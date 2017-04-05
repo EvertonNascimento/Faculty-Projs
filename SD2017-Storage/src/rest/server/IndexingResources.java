@@ -72,22 +72,6 @@ public class IndexingResources implements IndexerService {
 	@Path("/{id}")
 	public void remove(@PathParam("id") String id) throws Exception {
 		// TODO Auto-generated method stub
-		// o delete tem que apagar o documento de todos os servidores de
-		// indexação
-		// temos que contactar o rendevousserver para obter a lista de todos os
-		// endpoints que este conhece
-		// neste metodo teos que ser clientes de outro servidor
-		// para fazer isto precisamos do url do rendevousserver
-		// depois de termos a lista de endpoints em array vamos iterar sobre
-		// cada um dos endpoints e fazer uma operação de remove para apagar o
-		// documento
-		// temos que acrescentar à interface dos indexing services outra
-		// opreação (nome e path à nossa descrição). vai ser usada num servidor
-		// para pedir a outro servidor para apagar o ficheiro- opreção A
-		// é esta a opreção que o cliente chama para apagar o documento e onde
-		// vamos buscar a lista de endpoints, que estiver a iterar os endpoints
-		// invocamos a operação A para remover o documento destes, vai à local
-		// storage e remove o documento se ele existir
 		//
 
 		
@@ -107,6 +91,7 @@ public class IndexingResources implements IndexerService {
 		socket.setSoTimeout(3000);
 
 		do {
+			
 			byte[] buffer = new byte[65536];
 			DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 			request.setAddress(address);
@@ -126,6 +111,7 @@ public class IndexingResources implements IndexerService {
 					.get(Endpoint[].class);
 			
 			for(Endpoint e: endpoints){
+				
 				//e. removeFromStorage(id);
 				
 			}
