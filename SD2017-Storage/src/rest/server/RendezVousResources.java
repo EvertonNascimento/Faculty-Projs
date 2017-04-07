@@ -29,29 +29,27 @@ public class RendezVousResources implements RendezVousService {
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void register(@PathParam("id") String id, Endpoint endpoint) {
-		System.err.printf("register: %s <%s>\n", id, endpoint);
 
-		
+
 		if (db.containsKey(id))
 			throw new WebApplicationException(CONFLICT);
+
 		else
-			db.put(id, endpoint);
-	
-	
-	
-	
-	
+			System.err.printf("register: %s <%s>\n", id, endpoint);
+		    db.put(id, endpoint);
+
 	}
 
 	@PUT
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void update(@PathParam("id") String id, Endpoint endpoint) {
-		System.err.printf("update: %s <%s>\n", id, endpoint);
+
 
 		if (!db.containsKey(id))
 			throw new WebApplicationException(NOT_FOUND);
 		else
+			System.err.printf("update: %s <%s>\n", id, endpoint);
 			db.put(id, endpoint);
 	}
 
@@ -63,7 +61,10 @@ public class RendezVousResources implements RendezVousService {
 			throw new WebApplicationException(NOT_FOUND);
 
 		else
-			db.remove(id);
+			System.err.printf("delete: %s \n", id);
+
+		      db.remove(id,db.get(id).getUrl());
+
 
 	}
 
