@@ -25,6 +25,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.client.ClientConfig;
@@ -39,99 +40,84 @@ import sys.storage.LocalVolatileStorage;;
 @Path("/indexer")
 public class IndexingResources implements IndexerService {
 
-	private Map<String, Document> db = new ConcurrentHashMap<>();
-	LocalVolatileStorage storage = new LocalVolatileStorage();
+    private Map<String, Document> db = new ConcurrentHashMap<>();
+    LocalVolatileStorage storage = new LocalVolatileStorage();
 
-	@GET
-	@Path("/search")
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<Document> search(@QueryParam("query") String keywords) {// List<String>
-		// TODO Auto-generated method stub
-		String[] kwords = keywords.split("+");
-		List<Document> docs = storage.search(Arrays.asList(kwords));
-		return docs;
-	}
+    @GET
+    @Path("/search")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Document> search(@QueryParam("query") String keywords) {// List<String>
+        // TODO Auto-generated method stub
+        String[] kwords = keywords.split("\\+");
+        List<Document> docs = storage.search(Arrays.asList(kwords));
+        return docs;
+    }
 
-	@Override
-	public void add(String id, Document doc) {
-		// TODO Auto-generated method stub
-		System.err.printf("add document: %s <%s>\n", id, doc);
+    @Override
+    public void add(String id, Document doc) {
+        // TODO Auto-generated method stub
+        System.err.printf("add document: %s <%s>\n", id, doc);
 
-		if (storage.store(id, doc))
-			System.out.println("document added successfully\n");
-		else
-			System.out.println("document could not be stored\n");
+        if (storage.store(id, doc))
+            System.out.println("document added successfully\n");
+        else
+            System.out.println("document could not be stored\n");
 
-		// if (db.containsKey(id))
-		// throw new WebApplicationException(CONFLICT);
-		// else
-		// db.put(id, doc);
-	}
+        // if (db.containsKey(id))
+        // throw new WebApplicationException(CONFLICT);
+        // else
+        // db.put(id, doc);
+    }
 
-	@DELETE
-	@Path("/{id}")
-	public void remove(@PathParam("id") String id) throws Exception {
-		// TODO Auto-generated method stub
-		//
+    @DELETE
+    @Path("/{id}")
+    public void remove(@PathParam("id") String id) throws Exception {
+        // TODO Auto-generated method stub
+        //
 
-		
-		ClientConfig config = new ClientConfig();
-		Client client = ClientBuilder.newClient(config);
 
-		// multicast
-		String hostname=null;
-		String multAddress = "229.229.229.229";// igual no servidor de indexação
-		int multPort = 9999;// igual no servidor de indexação
-		InetAddress address = null;
-		MulticastSocket socket = null;
-		WebTarget target=null;
+        //obter endepoints de onde vamos remover o documento
+        //////////////////////////////////////////////
+        Multicast m = new Multicast();
 
-		address = InetAddress.getByName(multAddress);
-		socket = new MulticastSocket();
-		socket.setSoTimeout(3000);
+        WebTarget target = m.GetMulticast();
 
-		do {
-			
-			byte[] buffer = new byte[65536];
-			DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-			request.setAddress(address);
-			request.setPort(multPort);
-			socket.send(request);
-			
-			DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-			socket.receive(reply);
-			
-			String serverUrl= new String(reply.getData(), 0, reply.getLength());
-			hostname=serverUrl;
-			
-			URI baseURI = UriBuilder.fromUri(hostname).build();
-			target = client.target(baseURI);
-			
-			Endpoint[] endpoints = target.path("/contacts").request().accept(MediaType.APPLICATION_JSON)
-					.get(Endpoint[].class);
-			
-			for(Endpoint e: endpoints){
-				
-				//e. removeFromStorage(id);
-				
-			}
-			
-			
-		} while(true);
+        Endpoint[] endpoints = target.path("/contacts").request().accept(MediaType.APPLICATION_JSON)
+                .get(Endpoint[].class);
+        //////////////////////////////////////////////
 
-//		if (!db.containsKey(id))
-//			throw new WebApplicationException(NOT_FOUND);
-//
-//		else
-//			db.remove(id);
 
-	}
 
-	@Override
-	public void removeFromStorage(String id) {
-		// TODO Auto-generated method stub
-		storage.remove(id);
-	}
+
+        ClientConfig clientConfig = new ClientConfig();
+        Client client = ClientBuilder.newClient(clientConfig);
+        WebTarget target2 = null;
+        Response response2 = null;
+
+        URI baseURI = null;
+
+
+        for (Endpoint e : endpoints) {
+
+            e.getUrl();
+
+            baseURI = UriBuilder.fromUri(e.getUrl()).build();
+
+            target2 = client.target(baseURI);
+
+            response2 = target2.path("/indexer/" + id).request().delete();
+
+            System.out.println("apagar documento: " + response2.getStatus());
+
+        }
+
+    }
+
+    @Override
+    public void removeFromStorage(String id) {
+        // TODO Auto-generated method stub
+        storage.remove(id);
+    }
 
 
 }
