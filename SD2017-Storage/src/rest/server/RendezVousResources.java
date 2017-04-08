@@ -17,55 +17,54 @@ import static javax.ws.rs.core.Response.Status.*;
 @Path("/contacts")
 public class RendezVousResources implements RendezVousService {
 
-	private Map<String, Endpoint> db = new ConcurrentHashMap<>();
+    private Map<String, Endpoint> db = new ConcurrentHashMap<>();
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public Endpoint[] endpoints() {
-		return db.values().toArray(new Endpoint[db.size()]);
-	}
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Endpoint[] endpoints() {
+        return db.values().toArray(new Endpoint[db.size()]);
+    }
 
-	@POST
-	@Path("/{id}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public void register(@PathParam("id") String id, Endpoint endpoint) {
-
-
-		if (db.containsKey(id))
-			throw new WebApplicationException(CONFLICT);
-
-		else
-			System.err.printf("register: %s <%s>\n", id, endpoint);
-		    db.put(id, endpoint);
-
-	}
-
-	@PUT
-	@Path("/{id}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public void update(@PathParam("id") String id, Endpoint endpoint) {
+    @POST
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void register(@PathParam("id") String id, Endpoint endpoint) {
 
 
-		if (!db.containsKey(id))
-			throw new WebApplicationException(NOT_FOUND);
-		else
-			System.err.printf("update: %s <%s>\n", id, endpoint);
-			db.put(id, endpoint);
-	}
+        if (db.containsKey(id))
+            throw new WebApplicationException(CONFLICT);
 
-	@DELETE
-	@Path("/{id}")
-	public void unregister(@PathParam("id") String id) {
+        else
+            System.err.printf("register: %s <%s>\n", id, endpoint);
+        db.put(id, endpoint);
 
-		if (!db.containsKey(id))
-			throw new WebApplicationException(NOT_FOUND);
+    }
 
-		else
-			System.err.printf("delete: %s \n", id);
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void update(@PathParam("id") String id, Endpoint endpoint) {
+        
+        if (!db.containsKey(id))
+            throw new WebApplicationException(NOT_FOUND);
+        else
+            System.err.printf("update: %s <%s>\n", id, endpoint);
+        db.put(id, endpoint);
+    }
 
-		      db.remove(id,db.get(id).getUrl());
+    @DELETE
+    @Path("/{id}")
+    public void unregister(@PathParam("id") String id) {
+
+        if (!db.containsKey(id))
+            throw new WebApplicationException(NOT_FOUND);
+
+        else {
+            System.err.printf("delete: %s \n", id);
+            db.remove(id);
+        }
 
 
-	}
+    }
 
 }

@@ -22,14 +22,14 @@ public class RegisterEndpoint {
 		ClientConfig config = new ClientConfig();
 		Client client = ClientBuilder.newClient(config);
 
-		String serverHost = null;
-		String endpointUrl = null;
+		String serverHost = "192.168.99.1:8080";/*null;*/
+		String endpointUrl = "http://indexer-1";
 		if (args.length > 0) {
 			serverHost = args[0];
 			endpointUrl = args[1];
 		}
 
-		System.err.println(serverHost);
+//		System.err.println(serverHost);
 
 		URI baseURI = UriBuilder.fromUri("http://" + serverHost + "/").build();
 
@@ -42,12 +42,12 @@ public class RegisterEndpoint {
 
 		Endpoint endpoint = new Endpoint(endpointUrl, Collections.emptyMap());
 
-		Response response = target.path("/contacts/" + endpoint.generateId()).request()
+		String endpointId= endpoint.generateId();
+
+		Response response = target.path("/contacts/" + endpointId).request()
 				.post(Entity.entity(endpoint, MediaType.APPLICATION_JSON));
 
-		System.err.println(response.getStatus());
-
-		System.out.print("caralho " +response.getStatus() );
-
+		System.err.println("Endepoint added with response: "+response.getStatus()+" info: "+response.getStatusInfo());
+		System.err.println("Endepoints id:"+endpointId);
 	}
 }

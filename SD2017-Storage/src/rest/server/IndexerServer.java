@@ -1,9 +1,7 @@
 
 package rest.server;
 
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.util.Collections;
 
 import javax.ws.rs.client.Client;
@@ -55,6 +53,9 @@ public class IndexerServer {
         Response response = target.path("/contacts/" + endpoint.generateId()).request()
                 .post(Entity.entity(endpoint, MediaType.APPLICATION_JSON));
         System.err.println(response.getStatus());
+
+
+      
 
 
     }

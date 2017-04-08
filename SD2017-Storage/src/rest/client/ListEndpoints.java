@@ -23,7 +23,7 @@ public class ListEndpoints {
 		ClientConfig config = new ClientConfig();
 		Client client = ClientBuilder.newClient(config);
 
-		String serverHost = null;
+		String serverHost = "192.168.99.1:8080";/*null;*/
 		if (args.length > 0)
 			serverHost = args[0];
 
