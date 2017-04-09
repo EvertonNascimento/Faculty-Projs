@@ -20,7 +20,7 @@ public interface IndexerService {
 	@GET
 	@Path("/search")
 	@Produces(MediaType.APPLICATION_JSON)
-	List<Document> search(@QueryParam("query") String keywords); //List<String>
+	List<String> search(@QueryParam("query") String keywords);
 
 	/**
 	* Adiciona informacao sobre documento doc com identificador id.

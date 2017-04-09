@@ -9,9 +9,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.*;
@@ -21,6 +19,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import javax.xml.crypto.dom.DOMCryptoContext;
 
 import org.glassfish.jersey.client.ClientConfig;
 
@@ -34,27 +33,36 @@ import sys.storage.LocalVolatileStorage;
 @Path("/indexer")
 public class IndexingResources implements IndexerService {
 
-    private Map<String, Document> db = new ConcurrentHashMap<>();
     LocalVolatileStorage storage = new LocalVolatileStorage();
 
     @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Document> search(@QueryParam("query") String keywords) {// List<String>
-        // TODO Auto-generated method stub
+    public List<String> search(@QueryParam("query") String keywords) {
         String[] kwords = keywords.split("\\+");
+        System.err.println(Arrays.toString(kwords));
         List<Document> docs = storage.search(Arrays.asList(kwords));
-        return docs;
+
+        List<String> docsUrl = new ArrayList<>();
+
+        docs.forEach(document -> docsUrl.add(document.getUrl()));
+
+        if (docs.equals(null))
+            throw new WebApplicationException(NOT_FOUND);
+        else {
+            return docsUrl;
+        }
+
+
     }
 
     @POST
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public void add(@PathParam("id") String id, Document doc) {
-//        System.err.printf("add document: %s <%s>\n", id, doc);
 
         if (storage.store(id, doc))
-            System.err.println("document added successfully\n");
+            System.err.println("document added successfully -> " + doc + "\n");
         else
             throw new WebApplicationException(CONFLICT);
     }
@@ -62,8 +70,6 @@ public class IndexingResources implements IndexerService {
     @DELETE
     @Path("/{id}")
     public void remove(@PathParam("id") String id) throws Exception {
-        // TODO Auto-generated method stub
-        //
 
 
         //obter endepoints de onde vamos remover o documento
@@ -133,7 +139,6 @@ public class IndexingResources implements IndexerService {
     @DELETE
     @Path("/remove/{id}")
     public void removeFromStorage(@PathParam("id") String id) {
-        // TODO Auto-generated method stub
         if (storage.remove(id))
             System.err.println("document " + id + " remove");
         else
