@@ -14,13 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -35,7 +29,7 @@ import com.google.common.net.InetAddresses;
 import api.Document;
 import api.Endpoint;
 import api.IndexerService;
-import sys.storage.LocalVolatileStorage;;
+import sys.storage.LocalVolatileStorage;
 
 @Path("/indexer")
 public class IndexingResources implements IndexerService {
@@ -53,20 +47,16 @@ public class IndexingResources implements IndexerService {
         return docs;
     }
 
-    @Override
-    public void add(String id, Document doc) {
-        // TODO Auto-generated method stub
-        System.err.printf("add document: %s <%s>\n", id, doc);
+    @POST
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void add(@PathParam("id") String id, Document doc) {
+//        System.err.printf("add document: %s <%s>\n", id, doc);
 
         if (storage.store(id, doc))
-            System.out.println("document added successfully\n");
+            System.err.println("document added successfully\n");
         else
-            System.out.println("document could not be stored\n");
-
-        // if (db.containsKey(id))
-        // throw new WebApplicationException(CONFLICT);
-        // else
-        // db.put(id, doc);
+            throw new WebApplicationException(CONFLICT);
     }
 
     @DELETE
@@ -82,11 +72,24 @@ public class IndexingResources implements IndexerService {
 
         WebTarget target = m.GetMulticast();
 
-        Endpoint[] endpoints = target.path("/contacts").request().accept(MediaType.APPLICATION_JSON)
-                .get(Endpoint[].class);
+        Endpoint[] endpoints = null;
+
+        boolean executed = false;
+        for (int i = 0; !executed && i < 3; i++) {
+            try {
+                endpoints = target.path("/contacts").request().accept(MediaType.APPLICATION_JSON)
+                        .get(Endpoint[].class);
+                executed = true;
+            } catch (RuntimeException e) {
+                if (i < 2) {
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e1) {
+                    }
+                }
+            }
+        }
         //////////////////////////////////////////////
-
-
 
 
         ClientConfig clientConfig = new ClientConfig();
@@ -105,18 +108,36 @@ public class IndexingResources implements IndexerService {
 
             target2 = client.target(baseURI);
 
-            response2 = target2.path("/indexer/" + id).request().delete();
 
-            System.out.println("apagar documento: " + response2.getStatus());
+            boolean executed1 = false;
+            for (int i = 0; !executed1 && i < 3; i++) {
+                try {
+                    response2 = target2.path("/indexer/remove/" + id).request().delete();
+                    executed1 = true;
+                } catch (RuntimeException e2) {
+                    if (i < 2) {
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e3) {
+                        }
+                    }
+                }
+            }
+
+            System.err.println("apagar documento: " + response2.getStatus());
 
         }
 
     }
 
-    @Override
-    public void removeFromStorage(String id) {
+    @DELETE
+    @Path("/remove/{id}")
+    public void removeFromStorage(@PathParam("id") String id) {
         // TODO Auto-generated method stub
-        storage.remove(id);
+        if (storage.remove(id))
+            System.err.println("document " + id + " remove");
+        else
+            System.err.println("delete failed");
     }
 
 

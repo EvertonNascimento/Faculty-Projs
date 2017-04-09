@@ -43,7 +43,7 @@ public interface IndexerService {
 	 * Apaga o documento do storage local
 	 */
 	@DELETE
-	@Path("/remove")
+	@Path("/remove/{id}")
 	void removeFromStorage(@PathParam("id") String id);
 
 }
