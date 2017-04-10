@@ -1,45 +1,46 @@
-package rest.server;
+package soap.server;
 
-import static javax.ws.rs.core.Response.Status.CONFLICT;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import api.Document;
+import api.Endpoint;
+import api.soap.IndexerAPI;
+import org.glassfish.jersey.client.ClientConfig;
+import rest.server.Multicast;
+import sys.storage.LocalVolatileStorage;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.ws.rs.*;
+import javax.jws.WebService;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import javax.xml.crypto.dom.DOMCryptoContext;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import org.glassfish.jersey.client.ClientConfig;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
-import com.google.common.net.InetAddresses;
 
-import api.Document;
-import api.Endpoint;
-import api.IndexerService;
-import sys.storage.LocalVolatileStorage;
+/**
+ * Created by Rui Soares n 41783
+ */
 
-@Path("/indexer")
-@SuppressWarnings("Duplicates")
-public class IndexingResources implements IndexerService {
 
-    LocalVolatileStorage storage = new LocalVolatileStorage();
+@WebService(
+        serviceName = IndexerAPI.NAME,
+        targetNamespace = IndexerAPI.NAMESPACE,
+        endpointInterface = IndexerAPI.INTERFACE)
 
-    @GET
-    @Path("/search")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<String> search(@QueryParam("query") String keywords) {
+public class IndexerServerImpl implements IndexerAPI {
+
+    private LocalVolatileStorage storage = new LocalVolatileStorage();
+
+
+    @Override
+    @SuppressWarnings("Duplicates")
+    public List<String> search(String keywords) throws InvalidArgumentException {
         String[] kwords = keywords.split("\\+");
 
         List<Document> docs = storage.search(Arrays.asList(kwords));
@@ -49,29 +50,39 @@ public class IndexingResources implements IndexerService {
         docs.forEach(document -> docsUrl.add(document.getUrl()));
 
         if (docs.equals(null))
-            throw new WebApplicationException(NOT_FOUND);
+            throw new InvalidArgumentException();
         else {
             return docsUrl;
         }
-
-
     }
 
-    @POST
-    @Path("/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void add(@PathParam("id") String id, Document doc) {
+    @Override
+    public boolean add(Document doc) throws InvalidArgumentException {
 
-        if (storage.store(id, doc))
+        if (doc.equals(null)) {
+            throw new InvalidArgumentException();
+        } else if (storage.store(doc.id(), doc)) {
             System.err.println("document added successfully -> " + doc + "\n");
-        else
-            throw new WebApplicationException(CONFLICT);
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
-    @DELETE
-    @Path("/{id}")
-    public void remove(@PathParam("id") String id) throws Exception {
+    /**
+     * AINDA NAO TRATA DO CASO EM QUE DA FALSE (DOCUMENTO NAO EXISTE NO SISTEMA)
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    @Override
+    @SuppressWarnings("Duplicates")
+    public boolean remove(String id) throws Exception {
 
+
+        if(id.equals(null))
+            throw new InvalidArgumentException();
 
         //obter endepoints de onde vamos remover o documento
         //////////////////////////////////////////////
@@ -107,6 +118,7 @@ public class IndexingResources implements IndexerService {
         URI baseURI = null;
 
 
+        boolean executed1 = false;
         for (Endpoint e : endpoints) {
 
             e.getUrl();
@@ -116,16 +128,17 @@ public class IndexingResources implements IndexerService {
             target2 = client.target(baseURI);
 
 
-            boolean executed1 = false;
             for (int i = 0; !executed1 && i < 3; i++) {
                 try {
                     response2 = target2.path("/indexer/remove/" + id).request().delete();
                     executed1 = true;
+                    return true; ///////////////////////////////////////////////////////////ISTO PODE TAR MAL FEITO. RESPOSTA PODE NAO SER SEMPRE TRUE
                 } catch (RuntimeException e2) {
                     if (i < 2) {
                         try {
                             Thread.sleep(3000);
                         } catch (InterruptedException e3) {
+                            return false;///////////////////////////////////////////////////////////ISTO PODE TAR MAL FEITO. RESPOSTA PODE NAO SER SEMPRE FALSE
                         }
                     }
                 }
@@ -135,15 +148,18 @@ public class IndexingResources implements IndexerService {
 
         }
 
+        return executed1;
     }
 
-    @DELETE
-    @Path("/remove/{id}")
-    public void removeFromStorage(@PathParam("id") String id) {
-        if (storage.remove(id))
+    @Override
+    public boolean removeFromStorage(String id) { //mudar return para bool
+        if (storage.remove(id)) {
             System.err.println("document " + id + " remove");
-        else
+            return true;
+        } else {
             System.err.println("delete failed");
+            return false;
+        }
     }
 
 

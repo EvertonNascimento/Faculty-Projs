@@ -1,6 +1,7 @@
 package rest.client;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.util.Collections;
 
@@ -22,8 +23,8 @@ public class RegisterEndpoint {
 		ClientConfig config = new ClientConfig();
 		Client client = ClientBuilder.newClient(config);
 
-		String serverHost = "192.168.99.1:8080";/*null;*/
-		String endpointUrl = "http://indexer-1";
+		String serverHost = /*"192.168.99.1:8080";*/null;
+		String endpointUrl = /*"http://indexer-1";*/null;
 		if (args.length > 0) {
 			serverHost = args[0];
 			endpointUrl = args[1];
@@ -48,6 +49,7 @@ public class RegisterEndpoint {
 				.post(Entity.entity(endpoint, MediaType.APPLICATION_JSON));
 
 		System.err.println("Endepoint added with response: "+response.getStatus()+" info: "+response.getStatusInfo());
+		System.err.println("Endpoint ready @ "+endpointUrl+" local ip: "+ InetAddress.getLocalHost().getHostAddress());
 		System.err.println("Endepoints id:"+endpointId);
 	}
 }

@@ -24,8 +24,8 @@ public class RemoveEndpoint {
         ClientConfig config = new ClientConfig();
         Client client = ClientBuilder.newClient(config);
 
-        String serverHost = "192.168.99.1:8080";/*null;*/
-        String endpointId = "D16A0D458C240DDC52367FC370FCE615";/*null;*/
+        String serverHost = /*"192.168.99.1:8080";*/null;
+        String endpointId = /*"D16A0D458C240DDC52367FC370FCE615";*/null;
         if (args.length > 0)
 
         {

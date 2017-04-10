@@ -66,7 +66,6 @@ public class RendezVousResources implements RendezVousService {
             db.remove(id);
         }
 
-
     }
 
 }

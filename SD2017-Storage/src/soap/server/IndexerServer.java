@@ -1,38 +1,39 @@
+package soap.server;
 
-package rest.server;
-
-import java.net.*;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import rest.server.Multicast;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+import javax.xml.ws.Endpoint;
+import java.net.InetAddress;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
-
-
+/**
+ * Created by Rui Soares n 41783
+ */
 public class IndexerServer {
 
     @SuppressWarnings("Duplicates")
     public static void main(String[] args) throws Exception {
 
+
+        /**
+         *
+         * AQUI NAO E PRECISO MULTICAST. NOS TESTES O ADRESS DO RENDEVOUS E PASSADO NOS ARGS
+         *
+         */
         Multicast m = new Multicast();
-        int port = 8081;
-        URI baseUri = null;
+        int port = 9090;
 
-        baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(port).build();
+        String baseURI = String.format("http://0.0.0.0:%d/indexer", port);
 
-        ResourceConfig config = new ResourceConfig();
-        config.register(new IndexingResources());
+        Endpoint.publish(baseURI, new IndexerServerImpl());
 
-        JdkHttpServerFactory.createHttpServer(baseUri, config);
-
-        System.err.println("REST Indexing Server ready @ " + baseUri + " : local IP = "
+        System.err.println("SOAP Indexer Server ready @ " + baseURI + " : local IP = "
                 + InetAddress.getLocalHost().getHostAddress());
 
 
@@ -40,9 +41,8 @@ public class IndexerServer {
 
         //regista servidor
         String serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port;
-
         Map<String, Object> attributes= new HashMap<>();
-        attributes.put("type","rest");
+        attributes.put("type","soap");
 
         api.Endpoint endpoint = new api.Endpoint(serverUrl, attributes);
         Response response = null;
@@ -64,7 +64,5 @@ public class IndexerServer {
         }
 
         System.err.println(response.getStatus() + " info: " + response.getStatusInfo());
-
     }
-
 }

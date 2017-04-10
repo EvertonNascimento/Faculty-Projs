@@ -22,7 +22,7 @@ public class AddDocument {
 		ClientConfig clientConfig = new ClientConfig();
 		Client client = ClientBuilder.newClient(clientConfig);
 
-		String serverHost = null;
+		String serverHost = "192.168.99.1:8081"; /*null;*/
 		if (args.length > 0)
 			serverHost = args[0];
 
@@ -32,12 +32,13 @@ public class AddDocument {
 
 		WebTarget target = client.target(baseURI);
 
-		Document document = new Document("http://some-server-document-url", Collections.emptyList());
+		Document document = new Document("http://polyform.di.fct.unl.pt/docs/5d905a2fea6ca89c", Collections.emptyList());
 
 		Response response = target.path("/indexer/" + document.id()).request()
 				.post(Entity.entity(document, MediaType.APPLICATION_JSON));
 
 		System.out.println("adicionar documento: " + response.getStatus());
+		System.err.println(response.getLinks().toString());
 	}
 
 }

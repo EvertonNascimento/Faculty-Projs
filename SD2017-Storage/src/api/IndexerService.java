@@ -5,7 +5,6 @@ import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
-import api.Document;
 
 /**
 * Interface do servidor de indexacao.
