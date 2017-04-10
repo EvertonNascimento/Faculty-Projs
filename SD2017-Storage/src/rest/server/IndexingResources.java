@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.net.SocketTimeoutException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
@@ -92,6 +93,7 @@ public class IndexingResources implements IndexerService {
                     try {
                         Thread.sleep(3000);
                     } catch (InterruptedException e1) {
+                        System.err.println("EXPLOSION 1");
                     }
                 }
             }
@@ -126,16 +128,16 @@ public class IndexingResources implements IndexerService {
                         try {
                             Thread.sleep(3000);
                         } catch (InterruptedException e3) {
+                            System.err.println("EXPLOSION 2");
                         }
                     }
                 }
             }
 
             System.err.println("apagar documento: " + response2.getStatus());
-
         }
-
     }
+
 
     @DELETE
     @Path("/remove/{id}")

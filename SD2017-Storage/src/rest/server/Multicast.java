@@ -37,7 +37,7 @@ public class Multicast {
 
         address = InetAddress.getByName(multAddress);
         socket = new MulticastSocket();
-        socket.setSoTimeout(3000);
+        socket.setSoTimeout(300000000);
 
         DatagramPacket reply = null;
                                 //65536

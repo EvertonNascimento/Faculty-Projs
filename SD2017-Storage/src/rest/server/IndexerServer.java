@@ -14,13 +14,21 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import api.HeartBeat;
 
 
 public class IndexerServer {
 
+    private static HeartBeat heart;
+
     @SuppressWarnings("Duplicates")
     public static void main(String[] args) throws Exception {
 
+        /**
+         *
+         * AQUI NAO E PRECISO MULTICAST. NOS TESTES O ADRESS DO RENDEVOUS E PASSADO NOS ARGS
+         *
+         */
         Multicast m = new Multicast();
         int port = 8081;
         URI baseUri = null;
@@ -41,16 +49,20 @@ public class IndexerServer {
         //regista servidor
         String serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port;
 
-        Map<String, Object> attributes= new HashMap<>();
-        attributes.put("type","rest");
+
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("type", "rest");
 
         api.Endpoint endpoint = new api.Endpoint(serverUrl, attributes);
         Response response = null;
 
+        String indexerID = endpoint.generateId();
+
+
         boolean executed = false;
         for (int i = 0; !executed && i < 3; i++) {
             try {
-                response = target.path("/contacts/" + endpoint.generateId()).request()
+                response = target.path("/contacts/" + indexerID).request()
                         .post(Entity.entity(endpoint, MediaType.APPLICATION_JSON));
                 executed = true;
             } catch (RuntimeException e) {
@@ -64,6 +76,18 @@ public class IndexerServer {
         }
 
         System.err.println(response.getStatus() + " info: " + response.getStatusInfo());
+
+
+        //heartbeat
+        String multAddress = "229.229.229.229";
+        MulticastSocket sock = null;
+        int multPort = 9999;
+
+        final InetAddress addr = InetAddress.getByName(multAddress);
+        sock = new MulticastSocket();
+
+        heart = new HeartBeat(sock, addr, multPort, indexerID);
+        heart.run();
 
     }
 

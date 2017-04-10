@@ -64,6 +64,8 @@ public class RendezVousResources implements RendezVousService {
         else {
             System.err.printf("delete: %s \n", id);
             db.remove(id);
+
+
         }
 
     }
