@@ -37,7 +37,7 @@ public class Multicast {
 
         address = InetAddress.getByName(multAddress);
         socket = new MulticastSocket();
-        socket.setSoTimeout(300000000);
+        socket.setSoTimeout(3000);
 
                                 //65536
         byte[] buffer = new byte[64000];

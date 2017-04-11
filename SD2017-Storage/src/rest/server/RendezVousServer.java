@@ -58,7 +58,7 @@ public class RendezVousServer {
         String serverUrl = null;
 
 
-        long response_time = 7000; //miliseconds
+        long response_time = 10000; //miliseconds
         int delay = 8000;
         //runs checkup on servers
         int finalPort = port;
@@ -108,7 +108,7 @@ public class RendezVousServer {
                 check_servers(msg, liveservers, currenttime, response_time, host, port);
 
             } else if (msg.contains("rendezvous")) {
-                serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port/*+"/contacts/"*/;
+                serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port+"/contacts/";
                 reply.setSocketAddress(new InetSocketAddress(request.getAddress(), request.getPort()));
                 reply.setData(serverUrl.getBytes());
                 socket.send(reply);

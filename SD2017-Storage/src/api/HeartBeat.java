@@ -19,7 +19,7 @@ public class HeartBeat extends Thread
     public static int port;
     public static String indexerID;
     private DatagramPacket hbMsg ;
-    static private long TmHB = 5000;  //heartbeat frequency in milliseconds
+    static private long TmHB = 3000;  //heartbeat frequency in milliseconds
 
     public void run(){
         // setup the hb datagram packet then run forever

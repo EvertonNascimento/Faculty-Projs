@@ -111,7 +111,7 @@ public class IndexerServerImpl implements IndexerAPI {
         boolean executed = false;
         for (int i = 0; !executed && i < 3; i++) {
             try {
-                endpoints = target.path("/contacts").request().accept(MediaType.APPLICATION_JSON)
+                endpoints = target.request().accept(MediaType.APPLICATION_JSON)
                         .get(Endpoint[].class);
                 executed = true;
             } catch (RuntimeException e) {

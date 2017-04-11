@@ -1,15 +1,20 @@
 package soap.server;
 
 import api.HeartBeat;
+import org.glassfish.jersey.client.ClientConfig;
 import rest.server.Multicast;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import javax.xml.ws.Endpoint;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +36,24 @@ public class IndexerServer {
          * AQUI NAO E PRECISO MULTICAST. NOS TESTES O ADRESS DO RENDEVOUS E PASSADO NOS ARGS
          *
          */
-        Multicast m = new Multicast();
-        int port = 9090;
+
+        int port;
+        WebTarget target;
+
+        if(args.length < 1){
+            Multicast m = new Multicast();
+            target = m.GetMulticast();
+
+        port = 9090;}
+        else{
+
+            ClientConfig config = new ClientConfig();
+            Client client = ClientBuilder.newClient(config);
+            URI baseURI = UriBuilder.fromUri(args[0]).build();
+            target = client.target(baseURI);
+
+        port =9090;
+        }
 
         String baseURI = String.format("http://0.0.0.0:%d/indexer", port);
 
@@ -42,7 +63,8 @@ public class IndexerServer {
                 + InetAddress.getLocalHost().getHostAddress());
 
 
-        WebTarget target = m.GetMulticast();
+
+
 
         //regista servidor
         String serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port;
@@ -61,7 +83,7 @@ public class IndexerServer {
         boolean executed = false;
         for (int i = 0; !executed && i < 3; i++) {
             try {
-                response = target.path("/contacts/" + indexerID).request()
+                response = target.path(indexerID).request()
                         .post(Entity.entity(endpoint, MediaType.APPLICATION_JSON));
                 executed = true;
             } catch (RuntimeException e) {

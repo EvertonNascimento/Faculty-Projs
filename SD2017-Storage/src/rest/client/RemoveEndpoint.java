@@ -60,7 +60,7 @@ public class RemoveEndpoint {
 
         System.err.println(" id = " + id);
 
-        baseURI = UriBuilder.fromUri("http://" + serverHost +"/").port(port).build();
+        baseURI = UriBuilder.fromUri("http://" + serverHost +"/contacts/").port(port).build();
 
 
         System.err.println(serverHost);
@@ -71,7 +71,7 @@ public class RemoveEndpoint {
 
         try {
 
-            Endpoint[] endpoints1 = target.path("/contacts").request().accept(MediaType.APPLICATION_JSON)
+            Endpoint[] endpoints1 = target.request().accept(MediaType.APPLICATION_JSON)
                     .get(Endpoint[].class);
 
             /*Endpoint[] endpoints1 = target.request().accept(MediaType.APPLICATION_JSON)
@@ -84,7 +84,7 @@ public class RemoveEndpoint {
 
 
 
-            Response response = target.path("/contacts/" + endpointId).request()
+            Response response = target.path(endpointId).request()
                     .delete();
 
             System.err.println("as array: " + Arrays.asList(endpoints1));
