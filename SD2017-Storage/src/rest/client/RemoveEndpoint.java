@@ -74,6 +74,9 @@ public class RemoveEndpoint {
             Endpoint[] endpoints1 = target.path("/contacts").request().accept(MediaType.APPLICATION_JSON)
                     .get(Endpoint[].class);
 
+            /*Endpoint[] endpoints1 = target.request().accept(MediaType.APPLICATION_JSON)
+                    .get(Endpoint[].class);*/
+
             //   System.err.println("as array: \n" + Arrays.asList(endpoints1));
 
             //System.err.println("-----------------After--------------------- \n");

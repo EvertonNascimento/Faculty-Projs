@@ -56,6 +56,7 @@ public class IndexerServer {
 
         String indexerID = endpoint.generateId();
 
+        System.err.println("target ->"+target);
 
         boolean executed = false;
         for (int i = 0; !executed && i < 3; i++) {

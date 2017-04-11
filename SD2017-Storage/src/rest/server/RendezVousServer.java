@@ -43,6 +43,8 @@ public class RendezVousServer {
                 + InetAddress.getLocalHost().getHostAddress());
 
         host = InetAddress.getLocalHost().getHostAddress();
+
+
         // multicast
         String multAddress = "229.229.229.229";//igual no servidor de indexa��o
         int multPort = 9999;//igual no servidor de indexa��o
@@ -105,22 +107,17 @@ public class RendezVousServer {
                 long currenttime = t;
                 check_servers(msg, liveservers, currenttime, response_time, host, port);
 
+            } else if (msg.contains("rendezvous")) {
+                serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port/*+"/contacts/"*/;
+                reply.setSocketAddress(new InetSocketAddress(request.getAddress(), request.getPort()));
+                reply.setData(serverUrl.getBytes());
+                socket.send(reply);
             }
-
-            serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port;
-            reply.setSocketAddress(new InetSocketAddress(request.getAddress(), request.getPort()));
-            reply.setData(serverUrl.getBytes());
-            socket.send(reply);
-
 
         }
 
 
     }
-
-
-
-
 
 
     //MULTICAST
@@ -176,7 +173,7 @@ public class RendezVousServer {
 
                 //if (lst_msg + 3 seconds) is not equal or bigger then current time
                 //it was sent more than 3 secs ago
-              //    int currenttime = currentTimeMillis(System.currentTimeMillis()) / 1000;
+                //    int currenttime = currentTimeMillis(System.currentTimeMillis()) / 1000;
 
                 long currenttime = NANOSECONDS.toSeconds(System.nanoTime());
 
@@ -187,7 +184,7 @@ public class RendezVousServer {
                     liveservers.remove(key);
                     ghosts.add(key.toString());
                     System.err.println("removed = \n" + key.toString());
-            }
+                }
             }
         }
 

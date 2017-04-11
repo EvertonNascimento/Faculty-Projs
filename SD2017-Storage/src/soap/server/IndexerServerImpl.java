@@ -15,7 +15,11 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPException;
+import javax.xml.ws.Service;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +45,13 @@ public class IndexerServerImpl implements IndexerAPI {
     @Override
     @SuppressWarnings("Duplicates")
     public List<String> search(String keywords) throws InvalidArgumentException {
+
+        try {
+            keywords.equals(null);
+        } catch (NullPointerException e) {
+            throw new InvalidArgumentException();
+        }
+
         String[] kwords = keywords.split("\\+");
 
         List<Document> docs = storage.search(Arrays.asList(kwords));
@@ -48,21 +59,21 @@ public class IndexerServerImpl implements IndexerAPI {
         List<String> docsUrl = new ArrayList<>();
 
         docs.forEach(document -> docsUrl.add(document.getUrl()));
+        return docsUrl;
 
-        if (docs.equals(null))
-            throw new InvalidArgumentException();
-        else {
-            return docsUrl;
-        }
     }
 
     @Override
     public boolean add(Document doc) throws InvalidArgumentException {
 
-        if (doc.equals(null)) {
+        try {
+            doc.equals(null);
+        } catch (NullPointerException e) {
             throw new InvalidArgumentException();
-        } else if (storage.store(doc.id(), doc)) {
-            System.err.println("document added successfully -> " + doc + "\n");
+        }
+
+        if (storage.store(doc.id(), doc)) {
+            System.err.println("document with id:" + doc.id() + " added successfully -> " + doc + "\n");
             return true;
         } else {
             return false;
@@ -72,6 +83,7 @@ public class IndexerServerImpl implements IndexerAPI {
 
     /**
      * AINDA NAO TRATA DO CASO EM QUE DA FALSE (DOCUMENTO NAO EXISTE NO SISTEMA)
+     *
      * @param id
      * @return
      * @throws Exception
@@ -80,9 +92,13 @@ public class IndexerServerImpl implements IndexerAPI {
     @SuppressWarnings("Duplicates")
     public boolean remove(String id) throws Exception {
 
+        boolean removalResult = false;
 
-        if(id.equals(null))
+        try {
+            id.equals(null);
+        } catch (NullPointerException e) {
             throw new InvalidArgumentException();
+        }
 
         //obter endepoints de onde vamos remover o documento
         //////////////////////////////////////////////
@@ -110,54 +126,87 @@ public class IndexerServerImpl implements IndexerAPI {
         //////////////////////////////////////////////
 
 
+        //parar contactar seridores REST
         ClientConfig clientConfig = new ClientConfig();
         Client client = ClientBuilder.newClient(clientConfig);
         WebTarget target2 = null;
-        Response response2 = null;
-
+        boolean response2 = false;
         URI baseURI = null;
 
 
+        //parar contactar seridores SOAP
+        QName qname = new QName(NAMESPACE, NAME);
+        URL wsURL = null;
+        Service service = null;
+        IndexerAPI indexer = null;
+
+
+        int endpointsQueExistem = endpoints.length;
+        int endpointsOndeOdocumentoNaoExiste = 0;
         boolean executed1 = false;
+
         for (Endpoint e : endpoints) {
+
 
             e.getUrl();
 
+            //parar contactar seridores REST
             baseURI = UriBuilder.fromUri(e.getUrl()).build();
-
             target2 = client.target(baseURI);
 
 
-            for (int i = 0; !executed1 && i < 3; i++) {
-                try {
-                    response2 = target2.path("/indexer/remove/" + id).request().delete();
-                    executed1 = true;
-                    return true; ///////////////////////////////////////////////////////////ISTO PODE TAR MAL FEITO. RESPOSTA PODE NAO SER SEMPRE TRUE
-                } catch (RuntimeException e2) {
-                    if (i < 2) {
-                        try {
-                            Thread.sleep(3000);
-                        } catch (InterruptedException e3) {
-                            return false;///////////////////////////////////////////////////////////ISTO PODE TAR MAL FEITO. RESPOSTA PODE NAO SER SEMPRE FALSE
-                        }
-                    }
-                }
+            //parar contactar seridores SOAP
+            try {
+                wsURL = new URL(String.format(baseURI + "/indexer?wsdl"));
+                service = Service.create(wsURL, qname);
+                indexer = service.getPort(IndexerAPI.class);
+            } catch (Exception e3) {
             }
 
-            System.err.println("apagar documento: " + response2.getStatus());
+
+            try {
+                if (e.getAttributes().get("type").equals("soap")) {
+                    removalResult = indexer.removeFromStorage(id);
+                    executed1 = true;
+                } else if (e.getAttributes().get("type").equals("rest")) {
+                    removalResult = target2.path("/indexer/remove/" + id).request().delete(boolean.class);
+                    executed1 = true;
+                }
+            } catch (Exception e3) {
+            }
+
+
+            try {
+                if (removalResult)
+                    System.err.println("document removed successfully -> " + id + "\n");
+                else {
+                    endpointsOndeOdocumentoNaoExiste++;
+                    if (endpointsOndeOdocumentoNaoExiste == endpointsQueExistem) {
+                        System.err.println("document does not exist");
+                        System.err.println("endpoints onde o documento não existe -> " + endpointsOndeOdocumentoNaoExiste);
+                        removalResult = false;
+                    } else {
+                        System.err.println("document could not be removed -> " + id + "\n");
+                        removalResult = true;
+                    }
+                }
+            } catch (Exception e3) {
+            }
 
         }
 
-        return executed1;
+        //   return executed1;
+        return removalResult;
+
+
     }
 
     @Override
-    public boolean removeFromStorage(String id) { //mudar return para bool
+    public boolean removeFromStorage(String id) {
         if (storage.remove(id)) {
-            System.err.println("document " + id + " remove");
             return true;
         } else {
-            System.err.println("delete failed");
+
             return false;
         }
     }

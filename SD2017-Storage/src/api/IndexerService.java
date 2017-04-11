@@ -43,6 +43,7 @@ public interface IndexerService {
 	 */
 	@DELETE
 	@Path("/remove/{id}")
-	void removeFromStorage(@PathParam("id") String id);
+	@Produces(MediaType.APPLICATION_JSON)
+	boolean removeFromStorage(@PathParam("id") String id);
 
 }

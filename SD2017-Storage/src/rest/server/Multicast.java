@@ -39,12 +39,15 @@ public class Multicast {
         socket = new MulticastSocket();
         socket.setSoTimeout(300000000);
 
-        DatagramPacket reply = null;
                                 //65536
         byte[] buffer = new byte[64000];
-        DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+        String line = "rendezvous";
+//        DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+        DatagramPacket request = new DatagramPacket(line.getBytes(), line.length());
         request.setAddress(address);
         request.setPort(multPort);
+        DatagramPacket reply = null;
+
 
         do{
 

@@ -4,14 +4,9 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.URI;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.net.SocketTimeoutException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
@@ -21,7 +16,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.xml.crypto.dom.DOMCryptoContext;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
 
+import api.soap.IndexerAPI;
 import org.glassfish.jersey.client.ClientConfig;
 
 import com.google.common.net.InetAddresses;
@@ -63,9 +61,9 @@ public class IndexingResources implements IndexerService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void add(@PathParam("id") String id, Document doc) {
 
-        if (storage.store(id, doc))
+        if (storage.store(id, doc)) {
             System.err.println("document added successfully -> " + doc + "\n");
-        else
+        } else
             throw new WebApplicationException(CONFLICT);
     }
 
@@ -73,6 +71,7 @@ public class IndexingResources implements IndexerService {
     @Path("/{id}")
     public void remove(@PathParam("id") String id) throws Exception {
 
+        boolean removalResult = false;
 
         //obter endepoints de onde vamos remover o documento
         //////////////////////////////////////////////
@@ -87,6 +86,8 @@ public class IndexingResources implements IndexerService {
             try {
                 endpoints = target.path("/contacts").request().accept(MediaType.APPLICATION_JSON)
                         .get(Endpoint[].class);
+                /*endpoints = target.request().accept(MediaType.APPLICATION_JSON)
+                        .get(Endpoint[].class);*/
                 executed = true;
             } catch (RuntimeException e) {
                 if (i < 2) {
@@ -100,52 +101,96 @@ public class IndexingResources implements IndexerService {
         }
         //////////////////////////////////////////////
 
-
+        //parar contactar seridores REST
         ClientConfig clientConfig = new ClientConfig();
         Client client = ClientBuilder.newClient(clientConfig);
         WebTarget target2 = null;
-        Response response2 = null;
+        boolean response2 = false;
 
         URI baseURI = null;
 
 
+        //parar contactar seridores SOAP
+        String NAME = "IndexerService";
+        String NAMESPACE = "http://sd2017";
+        String INTERFACE = "api.soap.IndexerAPI";
+        QName qname = new QName(NAMESPACE, NAME);
+        URL wsURL = null;
+        Service service = null;
+        IndexerAPI indexer = null;
+
+        int endpointsQueExistem = endpoints.length;
+        int endpointsOndeOdocumentoNaoExiste = 0;
+
         for (Endpoint e : endpoints) {
 
-            e.getUrl();
+            try {
+                e.getUrl();
 
-            baseURI = UriBuilder.fromUri(e.getUrl()).build();
+                //parar contactar seridores REST
+                baseURI = UriBuilder.fromUri(e.getUrl()).build();
+                target2 = client.target(baseURI);
+            } catch (Exception e1) {
+            }
 
-            target2 = client.target(baseURI);
+            //parar contactar seridores SOAP
+            try {
+                wsURL = new URL(String.format(baseURI + "/indexer?wsdl"));
+                service = Service.create(wsURL, qname);
+                indexer = service.getPort(IndexerAPI.class);
+            } catch (Exception e3) {
+            }
 
 
             boolean executed1 = false;
             for (int i = 0; !executed1 && i < 3; i++) {
+
+
                 try {
-                    response2 = target2.path("/indexer/remove/" + id).request().delete();
-                    executed1 = true;
-                } catch (RuntimeException e2) {
-                    if (i < 2) {
+                    if (e.getAttributes().get("type").equals("soap")) {
+                        removalResult = indexer.removeFromStorage(id);
+                        executed1 = true;
+                    } else if (e.getAttributes().get("type").equals("rest")) {
                         try {
-                            Thread.sleep(3000);
-                        } catch (InterruptedException e3) {
-                            System.err.println("EXPLOSION 2");
+                            removalResult = target2.path("/indexer/remove/" + id).request().delete(boolean.class);
+                        } catch (Exception e2) {
                         }
+                        executed1 = true;
                     }
+                } catch (Exception e2) {
+                }
+
+            }
+
+
+            if (removalResult)
+                System.err.println("document removed successfully -> " + id + "\n");
+            else {
+                endpointsOndeOdocumentoNaoExiste++;
+                if (endpointsOndeOdocumentoNaoExiste == endpointsQueExistem) {
+                    System.err.println("document does not exist");
+                    System.err.println("endpoints onde o documento não existe -> " + endpointsOndeOdocumentoNaoExiste);
+                    removalResult = false;
+                    throw new WebApplicationException(NOT_FOUND);
+                } else {
+                    System.err.println("document could not be removed -> " + id + "\n");
+                    removalResult = true;
                 }
             }
 
-            System.err.println("apagar documento: " + response2.getStatus());
         }
     }
 
 
     @DELETE
     @Path("/remove/{id}")
-    public void removeFromStorage(@PathParam("id") String id) {
-        if (storage.remove(id))
-            System.err.println("document " + id + " remove");
-        else
-            System.err.println("delete failed");
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean removeFromStorage(@PathParam("id") String id) {
+        if (storage.remove(id)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 

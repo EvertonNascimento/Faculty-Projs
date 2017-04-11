@@ -23,8 +23,8 @@ public class RegisterEndpoint {
 		ClientConfig config = new ClientConfig();
 		Client client = ClientBuilder.newClient(config);
 
-		String serverHost = /*"192.168.99.1:8080";*/null;
-		String endpointUrl = /*"http://indexer-1";*/null;
+		String serverHost = "192.168.99.1:8080/contacts";/*null;*/
+		String endpointUrl = "http://indexer-1";/*null;*/
 		if (args.length > 0) {
 			serverHost = args[0];
 			endpointUrl = args[1];
@@ -45,7 +45,7 @@ public class RegisterEndpoint {
 
 		String endpointId= endpoint.generateId();
 
-		Response response = target.path("/contacts/" + endpointId).request()
+		Response response = target.path(/*"/contacts/" + */endpointId).request()
 				.post(Entity.entity(endpoint, MediaType.APPLICATION_JSON));
 
 		System.err.println("Endepoint added with response: "+response.getStatus()+" info: "+response.getStatusInfo());
