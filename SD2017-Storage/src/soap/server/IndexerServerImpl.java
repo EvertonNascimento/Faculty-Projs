@@ -81,13 +81,7 @@ public class IndexerServerImpl implements IndexerAPI {
 
     }
 
-    /**
-     * AINDA NAO TRATA DO CASO EM QUE DA FALSE (DOCUMENTO NAO EXISTE NO SISTEMA)
-     *
-     * @param id
-     * @return
-     * @throws Exception
-     */
+
     @Override
     @SuppressWarnings("Duplicates")
     public boolean remove(String id) throws Exception {
@@ -100,8 +94,7 @@ public class IndexerServerImpl implements IndexerAPI {
             throw new InvalidArgumentException();
         }
 
-        //obter endepoints de onde vamos remover o documento
-        //////////////////////////////////////////////
+        //obter endpoints de onde vamos remover o documento
         Multicast m = new Multicast();
 
         WebTarget target = m.GetMulticast();
@@ -123,10 +116,8 @@ public class IndexerServerImpl implements IndexerAPI {
                 }
             }
         }
-        //////////////////////////////////////////////
 
-
-        //parar contactar seridores REST
+        //parar contactar servidores REST
         ClientConfig clientConfig = new ClientConfig();
         Client client = ClientBuilder.newClient(clientConfig);
         WebTarget target2 = null;
@@ -134,7 +125,7 @@ public class IndexerServerImpl implements IndexerAPI {
         URI baseURI = null;
 
 
-        //parar contactar seridores SOAP
+        //parar contactar servidores SOAP
         QName qname = new QName(NAMESPACE, NAME);
         URL wsURL = null;
         Service service = null;
@@ -195,7 +186,6 @@ public class IndexerServerImpl implements IndexerAPI {
 
         }
 
-        //   return executed1;
         return removalResult;
 
 

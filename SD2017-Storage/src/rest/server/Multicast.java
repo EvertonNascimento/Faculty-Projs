@@ -11,9 +11,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.URI;
 
-/**
- * Created by GOD on 4/4/2017.
- */
 public class Multicast {
 
 
@@ -42,7 +39,6 @@ public class Multicast {
                                 //65536
         byte[] buffer = new byte[64000];
         String line = "rendezvous";
-//        DatagramPacket request = new DatagramPacket(buffer, buffer.length);
         DatagramPacket request = new DatagramPacket(line.getBytes(), line.length());
         request.setAddress(address);
         request.setPort(multPort);

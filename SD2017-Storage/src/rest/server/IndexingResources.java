@@ -74,7 +74,6 @@ public class IndexingResources implements IndexerService {
         boolean removalResult = false;
 
         //obter endepoints de onde vamos remover o documento
-        //////////////////////////////////////////////
         Multicast m = new Multicast();
 
         WebTarget target = m.GetMulticast();
@@ -99,7 +98,6 @@ public class IndexingResources implements IndexerService {
                 }
             }
         }
-        //////////////////////////////////////////////
 
         //parar contactar seridores REST
         ClientConfig clientConfig = new ClientConfig();

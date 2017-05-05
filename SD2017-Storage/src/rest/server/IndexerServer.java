@@ -27,11 +27,6 @@ public class IndexerServer {
     @SuppressWarnings("Duplicates")
     public static void main(String[] args) throws Exception {
 
-        /**
-         *
-         * AQUI NAO E PRECISO MULTICAST. NOS TESTES O ADRESS DO RENDEVOUS E PASSADO NOS ARGS
-         *
-         */
 
         int port = 8081;
         URI baseUri = null;

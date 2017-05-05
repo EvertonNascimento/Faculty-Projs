@@ -19,9 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by Rui Soares n 41783
- */
 public class IndexerServer {
 
     private static HeartBeat heart;
@@ -29,13 +26,6 @@ public class IndexerServer {
 
     @SuppressWarnings("Duplicates")
     public static void main(String[] args) throws Exception {
-
-
-        /**
-         *
-         * AQUI NAO E PRECISO MULTICAST. NOS TESTES O ADRESS DO RENDEVOUS E PASSADO NOS ARGS
-         *
-         */
 
         int port;
         WebTarget target;
@@ -68,7 +58,6 @@ public class IndexerServer {
 
         //regista servidor
         String serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port;
-
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("type", "soap");

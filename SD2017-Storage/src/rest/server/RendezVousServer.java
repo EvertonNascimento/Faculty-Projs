@@ -15,7 +15,6 @@ import javax.swing.Timer;
 
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import rest.client.RemoveEndpoint;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
@@ -93,7 +92,6 @@ public class RendezVousServer {
 
             //checking liveservers
             //verify if it is really the indexer adress
-            //host = request.getAddress().getHostAddress();
 
             String[] s = msg.split(" ");
 
@@ -101,14 +99,11 @@ public class RendezVousServer {
             if (msg.contains("alive") && !ghosts.contains(s[1])) {
 
 
-//                System.err.println("received heartbeat: " + t);
-
-
                 long currenttime = t;
                 check_servers(msg, liveservers, currenttime, response_time, host, port);
 
             } else if (msg.contains("rendezvous")) {
-                serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port+"/contacts/";
+                serverUrl = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port + "/contacts/";
                 reply.setSocketAddress(new InetSocketAddress(request.getAddress(), request.getPort()));
                 reply.setData(serverUrl.getBytes());
                 socket.send(reply);
@@ -137,7 +132,6 @@ public class RendezVousServer {
 
         } else {
 
-            //  System.err.println("contains s1 =" + s[1] );
             long lastresponse = Long.parseLong(liveservers.get(s[1]).toString());
 
 
@@ -148,10 +142,7 @@ public class RendezVousServer {
                 ghosts.add(s[1]);
             } else {
                 //updates last response time
-
                 liveservers.replace(s[1], lastresponse, currentTime);
-//                System.err.println("updated time = " +  Long.parseLong(liveservers.get(s[1]).toString()));
-
             }
 
         }
@@ -166,14 +157,9 @@ public class RendezVousServer {
         if (!liveservers.isEmpty()) {
             System.out.println("table cleanup");
 
-
             for (Object key : liveservers.keySet()) {
 
                 long lst_msg = Long.parseLong(liveservers.get(key).toString());
-
-                //if (lst_msg + 3 seconds) is not equal or bigger then current time
-                //it was sent more than 3 secs ago
-                //    int currenttime = currentTimeMillis(System.currentTimeMillis()) / 1000;
 
                 long currenttime = NANOSECONDS.toSeconds(System.nanoTime());
 
